@@ -23,8 +23,8 @@
     }
 
     @font-face {
-      font-family: "Cheap Potatoes Black";
-      src: url("./fonts/CheapPotatoesBlack.woff2") format("woff2");
+      font-family: "Manic Depressive";
+      src: url("./fonts/ManicDepressive.woff2") format("woff2");
       font-display: swap;
     }
 
@@ -35,10 +35,10 @@
     }
 
     @font-face {
-  font-family: "Special Elite";
-  src: url("./fonts/SpecialElite.woff2") format("woff2");
-  font-display: swap;
-}
+      font-family: "Special Elite";
+      src: url("./fonts/SpecialElite.woff2") format("woff2");
+      font-display: swap;
+    }
 
     body {
       margin: 0;
@@ -223,20 +223,17 @@
     }
 
     .quoteText span {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  white-space: normal;
-  word-break: normal;
-  overflow-wrap: normal;
-  hyphens: none;
-  letter-spacing: 0.02em;
-  font-size: 52px;
-
-  /* This line is optional; the JS already sets the font on #quoteText.
-     Keeping it here makes the chosen font more consistently visible. */
-  font-family: inherit;
-}
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      white-space: normal;
+      word-break: normal;
+      overflow-wrap: normal;
+      hyphens: none;
+      letter-spacing: 0.02em;
+      font-size: 52px;
+      font-family: inherit;
+    }
 
     #copyStatus {
       margin-top: 0.6rem;
@@ -304,7 +301,7 @@
 
     imageUrls.forEach(u => { const i = new Image(); i.src = u; });
 
-    const fontChoices = ["Special Elite", "Leander", "Cheap Potatoes Black"];
+    const fontChoices = ["Special Elite", "Leander", "Manic Depressive"];
 
     /* ----------------------------
        Slider fill handling

@@ -223,7 +223,19 @@
     }
 
     .quoteText span {
-  font-family: "Special Elite", monospace !important;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+  letter-spacing: 0.02em;
+  font-size: 52px;
+
+  /* This line is optional; the JS already sets the font on #quoteText.
+     Keeping it here makes the chosen font more consistently visible. */
+  font-family: inherit;
 }
 
     #copyStatus {

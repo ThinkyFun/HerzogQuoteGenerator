@@ -235,7 +235,7 @@
       font-family: inherit;
     }
 
-    /* NEW: website label in lower-right */
+    /* Website label in lower-right */
     .siteMark {
       position: absolute;
       right: 14px;
@@ -286,7 +286,6 @@
       <div class="quoteText">
         <span id="quoteText">Click “Generate Quote.” Or do not. The Universe is indifferent.</span>
       </div>
-      <!-- NEW: visible watermark -->
       <div id="siteMark" class="siteMark"></div>
     </div>
 
@@ -303,8 +302,7 @@
     /* ----------------------------
        Config
     ---------------------------- */
-    // What to print on the image (uses current hostname/path by default)
-    const SITE_LABEL = `${location.host}${location.pathname}`;
+    const SITE_LABEL = "giandeau.github.io/HerzogQuoteGenerator/";
 
     /* ----------------------------
        Assets
@@ -620,8 +618,8 @@
     }
 
     function drawSiteMark(ctx, W, H) {
-      const pad = Math.round(W * 0.018);      // ~28px at 1600w
-      const fontSize = Math.max(18, Math.round(W * 0.014)); // ~22px at 1600w
+      const pad = Math.round(W * 0.018);
+      const fontSize = Math.max(18, Math.round(W * 0.014));
 
       ctx.save();
       ctx.textAlign = "right";
@@ -699,7 +697,6 @@
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
 
-      // NEW: add site mark on the exported image
       drawSiteMark(ctx, W, H);
 
       return canvas;

@@ -6,18 +6,12 @@
   <title>Werner Herzog Quote Generator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Favicon (you said you have favicon/favicon.ico in the repo) -->
   <link rel="icon" href="./favicon/favicon.ico?v=1" sizes="any">
 
   <style>
     :root {
-      /* Button yellow */
       --btn-gold: #f4c542;
-
-      /* Label color (Wehmut) */
       --thumb-blue: #4da3ff;
-
-      /* Slider fill/thumb matches "Wehmut" */
       --slider-fill: var(--thumb-blue);
 
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -95,7 +89,6 @@
       white-space: nowrap;
     }
 
-    /* Filled track reflects current value in "Wehmut" color */
     input[type="range"] {
       width: 100%;
       accent-color: var(--slider-fill);
@@ -104,7 +97,6 @@
       --range-progress: 40%;
     }
 
-    /* WebKit */
     input[type="range"]::-webkit-slider-runnable-track {
       height: 6px;
       border-radius: 999px;
@@ -127,7 +119,6 @@
       box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
     }
 
-    /* Firefox */
     input[type="range"]::-moz-range-track {
       height: 6px;
       border-radius: 999px;
@@ -238,7 +229,6 @@
       font-family: inherit;
     }
 
-    /* Website label in lower-right */
     .siteMark {
       position: absolute;
       right: 14px;
@@ -281,7 +271,8 @@
     </div>
 
     <div class="buttons">
-      <button id="generateBtn">Generate Quote</button>
+      <!-- FIX: prevent unintended submit/reload -->
+      <button id="generateBtn" type="button">Generate Quote</button>
     </div>
 
     <div id="quoteCard" class="quoteCard" role="img" aria-label="Generated quote image">
@@ -293,7 +284,8 @@
     </div>
 
     <div class="buttons">
-      <button id="copyBtn">Copy. Or Don't. It Changes Nothing.</button>
+      <!-- FIX: prevent unintended submit/reload -->
+      <button id="copyBtn" type="button">Copy. Or Don't. It Changes Nothing.</button>
     </div>
 
     <div id="copyStatus"></div>
@@ -414,6 +406,7 @@
 
     function pushHistory(key, value, maxLen) {
       if (!value) return;
+      if (!history[key]) history[key] = [];
       history[key].unshift(value);
       if (history[key].length > maxLen) history[key].length = maxLen;
     }
@@ -422,6 +415,7 @@
 
     function pickNonRepeating(arr, recentKey, avoidCount, maxTries = 60) {
       if (!arr.length) return "";
+      if (!history[recentKey]) history[recentKey] = [];
       const avoid = new Set(history[recentKey].slice(0, avoidCount));
       for (let i = 0; i < maxTries; i++) {
         const candidate = randomFrom(arr);
@@ -513,7 +507,7 @@
       const text = document.getElementById("quoteText");
       const siteMark = document.getElementById("siteMark");
 
-      card.style.backgroundImage = `url("${state.bgUrl}")`;
+      if (state.bgUrl) card.style.backgroundImage = `url("${state.bgUrl}")`;
       text.style.fontFamily = `"${state.font}", system-ui, sans-serif`;
       text.textContent = state.quote;
 
@@ -553,33 +547,47 @@
       textEl.style.fontSize = best + "px";
     }
 
+    // FIX: prevent overlapping async generates (slider input can spam)
+    let generating = false;
+
     async function generate() {
-      const scaleEl = document.getElementById("herzogScale");
-      const scale = Number(scaleEl.value);
-      setSliderProgress(scaleEl);
+      if (generating) return;
+      generating = true;
 
-      const built = buildQuote(scale);
-      state.quote = built.quote;
+      try {
+        const scaleEl = document.getElementById("herzogScale");
+        const scale = Number(scaleEl.value);
+        setSliderProgress(scaleEl);
 
-      state.bgUrl = pickNonRepeating(imageUrls, "bgUrl", 2);
-      state.font = pickNonRepeating(fontChoices, "font", 2);
+        const built = buildQuote(scale);
+        state.quote = built.quote;
 
-      try { await document.fonts.load(`48px "${state.font}"`); } catch { }
+        state.bgUrl = pickNonRepeating(imageUrls, "bgUrl", 2);
+        state.font = pickNonRepeating(fontChoices, "font", 2);
 
-      applyQuoteCard();
-      requestAnimationFrame(() => fitQuoteTextToCard());
+        try {
+          if (document.fonts && document.fonts.load) {
+            await document.fonts.load(`48px "${state.font}"`);
+          }
+        } catch { }
 
-      pushHistory("openings", built.parts.o, 10);
-      pushHistory("subjects", built.parts.s, 6);
-      if (built.parts.obs) pushHistory("observations", built.parts.obs, 6);
+        applyQuoteCard();
+        requestAnimationFrame(() => fitQuoteTextToCard());
 
-      if (built.tier === "long") pushHistory("endings", built.parts.e, 6);
-      else pushHistory("shortEndings", built.parts.e, 6);
+        pushHistory("openings", built.parts.o, 10);
+        pushHistory("subjects", built.parts.s, 6);
+        if (built.parts.obs) pushHistory("observations", built.parts.obs, 6);
 
-      pushHistory("bgUrl", state.bgUrl, 4);
-      pushHistory("font", state.font, 4);
+        if (built.tier === "long") pushHistory("endings", built.parts.e, 6);
+        else pushHistory("shortEndings", built.parts.e, 6);
 
-      lastParts = { ...built.parts };
+        pushHistory("bgUrl", state.bgUrl, 4);
+        pushHistory("font", state.font, 4);
+
+        lastParts = { ...built.parts };
+      } finally {
+        generating = false;
+      }
     }
 
     /* ----------------------------
@@ -664,7 +672,11 @@
       let fontSize = 84;
       const minFont = 24;
 
-      try { await document.fonts.load(`${fontSize}px "${state.font}"`); } catch { }
+      try {
+        if (document.fonts && document.fonts.load) {
+          await document.fonts.load(`${fontSize}px "${state.font}"`);
+        }
+      } catch { }
 
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
@@ -771,8 +783,16 @@
        Wire up UI
     ---------------------------- */
     const scaleEl = document.getElementById("herzogScale");
-    document.getElementById("generateBtn").addEventListener("click", generate);
-    document.getElementById("copyBtn").addEventListener("click", copyQuoteImage);
+
+    document.getElementById("generateBtn").addEventListener("click", (e) => {
+      e.preventDefault();
+      generate();
+    });
+
+    document.getElementById("copyBtn").addEventListener("click", (e) => {
+      e.preventDefault();
+      copyQuoteImage();
+    });
 
     scaleEl.addEventListener("input", () => {
       setSliderProgress(scaleEl);
